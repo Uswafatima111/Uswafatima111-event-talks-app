@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Talks Event Schedule</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .search-bar input[type="text"] {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background-color: #0056b3;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .talk-card, .lunch-break-card {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .talk-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .talk-card h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .talk-card p {
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        .talk-card .time, .lunch-break-card .time {
+            font-weight: bold;
+            color: var(--secondary-color);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .talk-card .speakers span {
+            font-weight: 500;
+        }
+
+        .talk-card .category {
+            font-style: italic;
+            color: #28a745;
+            margin-top: auto; /* Pushes categories to the bottom */
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            margin-top: 15px;
+        }
+
+        .talk-card .description {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .lunch-break-card {
+            background-color: #ffeeba; /* Light yellow for lunch */
+            color: #856404;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            border-color: #ffc107;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+        }
+
+        .lunch-break-card h2 {
+            color: #856404;
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .no-results {
+            grid-column: 1 / -1; /* Span across all columns */
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            padding: 50px 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+            .search-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+            .search-bar input[type="text"] {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>1-Day Tech Talks Event</h1>
+
+        <div class="search-bar">
+            <input type="text" id="categorySearch" placeholder="Search by category (e.g., AI, Web Dev)">
+            <button id="searchButton">Search</button>
+            <button id="resetButton">Reset</button>
+        </div>
+
+        <div id="schedule" class="schedule-grid">
+            <!-- Schedule items will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const talksData = [
+                {
+                    title: "The Future of Web Development with WebAssembly",
+                    speakers: ["Alice Smith"],
+                    category: ["Web Development", "Performance"],
+                    duration: 60,
+                    description: "Explore how WebAssembly is revolutionizing web applications, enabling near-native performance in the browser and opening up new possibilities for complex client-side logic."
+                },
+                {
+                    title: "Advanced Machine Learning Techniques for Anomaly Detection",
+                    speakers: ["Bob Johnson", "Charlie Brown"],
+                    category: ["AI", "Machine Learning", "Data Science"],
+                    duration: 60,
+                    description: "Dive deep into cutting-edge algorithms for identifying unusual patterns in data, crucial for cybersecurity, fraud detection, and system health monitoring."
+                },
+                {
+                    title: "Building Scalable Microservices with Node.js and Kubernetes",
+                    speakers: ["Diana Prince"],
+                    category: ["Backend", "Cloud", "Node.js"],
+                    duration: 60,
+                    description: "Learn best practices for designing, deploying, and managing microservices architectures using Node.js, Docker, and Kubernetes for high-availability and scalability."
+                },
+                {
+                    title: "Cybersecurity Essentials for Developers: Protecting Your Code and Users",
+                    speakers: ["Eve Adams"],
+                    category: ["Security", "Best Practices"],
+                    duration: 60,
+                    description: "Understand common security vulnerabilities in web applications and how to implement robust defenses to safeguard your code, user data, and infrastructure."
+                },
+                {
+                    title: "Introduction to Quantum Computing: The Next Frontier",
+                    speakers: ["Frank White"],
+                    category: ["Emerging Tech", "Quantum Physics"],
+                    duration: 60,
+                    description: "An accessible introduction to the principles of quantum computing, its potential applications, and how it differs from classical computing paradigms."
+                },
+                {
+                    title: "UI/UX Design Principles for Engaging User Experiences",
+                    speakers: ["Grace Lee"],
+                    category: ["Frontend", "UI/UX Design"],
+                    duration: 60,
+                    description: "Master the fundamental principles of user interface and user experience design to create intuitive, aesthetically pleasing, and highly engaging digital products."
+                }
+            ];
+
+            const eventStartTime = new Date();
+            eventStartTime.setHours(10, 0, 0, 0); // Event starts at 10:00 AM today
+
+            let currentSlotTime = new Date(eventStartTime.getTime());
+            const scheduleElements = [];
+
+            // Calculate times for each talk and insert lunch break
+            talksData.forEach((talk, index) => {
+                const talkStart = new Date(currentSlotTime.getTime());
+                const talkEnd = new Date(currentSlotTime.getTime() + talk.duration * 60 * 1000);
+
+                talk.start_time = talkStart;
+                talk.end_time = talkEnd;
+                scheduleElements.push({ type: 'talk', data: talk });
+
+                currentSlotTime = new Date(talkEnd.getTime() + 10 * 60 * 1000); // 10 min transition
+
+                if (index === 2) { // After the 3rd talk (index 2)
+                    const lunchStart = new Date(currentSlotTime.getTime());
+                    const lunchEnd = new Date(currentSlotTime.getTime() + 60 * 60 * 1000); // 1 hour lunch
+
+                    scheduleElements.push({
+                        type: 'lunch',
+                        data: {
+                            title: "Lunch Break",
+                            start_time: lunchStart,
+                            end_time: lunchEnd,
+                            description: "Enjoy a delicious lunch and network with fellow attendees!"
+                        }
+                    });
+                    currentSlotTime = new Date(lunchEnd.getTime() + 10 * 60 * 1000); // 10 min transition after lunch
+                }
+            });
+
+            const scheduleDiv = document.getElementById('schedule');
+            const categorySearchInput = document.getElementById('categorySearch');
+            const searchButton = document.getElementById('searchButton');
+            const resetButton = document.getElementById('resetButton');
+
+            function formatTime(date) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            function renderSchedule(filteredSchedule = scheduleElements) {
+                scheduleDiv.innerHTML = ''; // Clear existing schedule
+
+                if (filteredSchedule.length === 0) {
+                    scheduleDiv.innerHTML = '<div class="no-results">No talks found matching your search criteria.</div>';
+                    return;
+                }
+
+                filteredSchedule.forEach(item => {
+                    if (item.type === 'talk') {
+                        const talk = item.data;
+                        const talkCard = document.createElement('div');
+                        talkCard.className = 'talk-card';
+                        talkCard.innerHTML = `
+                            <p class="time">${formatTime(talk.start_time)} - ${formatTime(talk.end_time)}</p>
+                            <h2>${talk.title}</h2>
+                            <p class="speakers">Speakers: <span>${talk.speakers.join(', ')}</span></p>
+                            <p class="description">${talk.description}</p>
+                            <p class="category">Categories: ${talk.category.join(', ')}</p>
+                        `;
+                        scheduleDiv.appendChild(talkCard);
+                    } else if (item.type === 'lunch') {
+                        const lunch = item.data;
+                        const lunchCard = document.createElement('div');
+                        lunchCard.className = 'lunch-break-card';
+                        lunchCard.innerHTML = `
+                            <p class="time">${formatTime(lunch.start_time)} - ${formatTime(lunch.end_time)}</p>
+                            <h2>${lunch.title}</h2>
+                            <p>${lunch.description}</p>
+                        `;
+                        scheduleDiv.appendChild(lunchCard);
+                    }
+                });
+            }
+
+            function filterTalks() {
+                const searchTerm = categorySearchInput.value.toLowerCase().trim();
+                if (!searchTerm) {
+                    renderSchedule(); // Render all if search term is empty
+                    return;
+                }
+
+                const filtered = scheduleElements.filter(item => {
+                    if (item.type === 'talk') {
+                        return item.data.category.some(cat => cat.toLowerCase().includes(searchTerm));
+                    }
+                    return false; // Don't filter lunch break
+                });
+
+                renderSchedule(filtered);
+            }
+
+            // Event Listeners
+            searchButton.addEventListener('click', filterTalks);
+            categorySearchInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    filterTalks();
+                }
+            });
+            resetButton.addEventListener('click', () => {
+                categorySearchInput.value = '';
+                renderSchedule();
+            });
+
+            // Initial render
+            renderSchedule();
+        });
+    </script>
+</body>
+</html>
